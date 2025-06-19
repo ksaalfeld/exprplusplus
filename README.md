@@ -76,5 +76,18 @@ The sat argument corresponds to the type argument of the fit() function which ar
     "uint32" (32 bit unsigned integer)
     "uint64" (64 bit unsigned integer)
 
+To compare elements of lists/vectors a cmp() math function has been added:
+
+    cmp(op, a, b) - Compare scalar or list/vector A and B using comparison operator op
+
+The op argument can be set to one of the following values:
+
+    "eq" - Test elements for equality (A == B)
+    "ne" - Test elements for inequality (A != B)
+    "gt" - Test if A elements are greater than B elements (A > B)
+    "ge" - Test if A elements are greater/equal than B elements (A >= B)
+    "lt" - Test if A elements are lower than B elements (A < B)
+    "le" - Test if A elements are lower/equal B elements (A <= B)
+
 Note that expr is implicitely used within the conditionals of control structures (if, while, for, ...).
 The features added by this package are therefore available in their conditionals as well.

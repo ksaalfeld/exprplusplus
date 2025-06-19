@@ -442,7 +442,7 @@ namespace eval ::tcl::mathfunc::legacy {
       proc ::tcl::mathfunc::round {x {mode "infinity"} {sat "int"}} {
          set y {}
          foreach p $x {
-            switch -- $mode {
+            switch -nocase -- $mode {
                "infinity" {
                   # Round ties away from zero towards infinity
                   if {$p < 0} {
@@ -572,6 +572,48 @@ namespace eval ::tcl::mathfunc::legacy {
    
    proc ::tcl::mathfunc::mod {a args} {
       return [::tcl::mathfunc::legacy::_exec_op % $a {*}$args]
+   }
+   
+   # We can't override compare operators so we add a cmp() function
+   #
+   # The OP argument can be one of the following values:
+   #    "eq"   A == B
+   #    "ne"   A != B
+   #    "gt"   A > B
+   #    "ge"   A >= B
+   #    "lt"   A < B
+   #    "le"   A <= B
+   #
+   # Example:
+   #
+   #    set a {-3 2 -1 5 -6}
+   #    expr {cmp("gt", $a, 0)}
+   #
+   
+   proc ::tcl::mathfunc::cmp {op a args} {
+      switch -nocase -- $op {
+         "eq" {
+             return [::tcl::mathfunc::legacy::_exec_op == $a {*}$args]
+         }
+         "ne" {
+             return [::tcl::mathfunc::legacy::_exec_op != $a {*}$args]
+         }
+         "gt" {
+             return [::tcl::mathfunc::legacy::_exec_op > $a {*}$args]
+         }
+         "ge" {
+             return [::tcl::mathfunc::legacy::_exec_op >= $a {*}$args]
+         }
+         "lt" {
+             return [::tcl::mathfunc::legacy::_exec_op < $a {*}$args]
+         }
+         "le" {
+             return [::tcl::mathfunc::legacy::_exec_op <= $a {*}$args]
+         }
+         default {
+            error "bad compare operator - $op"
+         }
+      }
    }
    
    # Additional math functions

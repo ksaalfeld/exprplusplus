@@ -11,7 +11,7 @@ This example computes the median absolute deviation of a vector/list:
     set x {2.3 3.1 2.8 2.5 3.2}
     set mad [expr {median(abs(sub($x, median($x))))}]
 
-It is possible to intermix scalar and vectors:
+It's possible to intermix scalar values and vectors:
 
     set x {1.0 2.0 3.0 4.0 5.0}
     set y [expr {sub(mul($x,2),1)}]
@@ -23,7 +23,7 @@ Put package into auto_path and load it:
 
     package require expr++
 
-The changes this package brings get into effect after loading it.
+Changes get into effect after loading the package.
 
 Beside replacing existing functions the package adds some new expr functions:
 

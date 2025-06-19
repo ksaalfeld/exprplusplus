@@ -89,5 +89,14 @@ The op argument can be set to one of the following values:
     "lt" - Test if A elements are lower than B elements (A < B)
     "le" - Test if A elements are lower/equal B elements (A <= B)
 
+Bit manipulation of lists/vectors is supported by the following math functions:
+
+    bitand(a, b) - Bitwise AND of scalars or elements in lists/vectors A and B
+    bitor(a, b) - Bitwise OR of scalars or elements in lists/vectors A and B
+    bitxor(a, b) - Bitwise XOR of scalars or elements in lists/vectors A and B
+    bitshift(x, n) - Bit shifting of elements in X by N positions
+
+The bitshift() function also supports N being a list/vector.
+
 Note that expr is implicitely used within the conditionals of control structures (if, while, for, ...).
 The features added by this package are therefore available in their conditionals as well.

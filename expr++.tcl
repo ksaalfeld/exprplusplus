@@ -593,27 +593,82 @@ namespace eval ::tcl::mathfunc::legacy {
    proc ::tcl::mathfunc::cmp {op a args} {
       switch -nocase -- $op {
          "eq" {
-             return [::tcl::mathfunc::legacy::_exec_op == $a {*}$args]
+            return [::tcl::mathfunc::legacy::_exec_op == $a {*}$args]
          }
          "ne" {
-             return [::tcl::mathfunc::legacy::_exec_op != $a {*}$args]
+            return [::tcl::mathfunc::legacy::_exec_op != $a {*}$args]
          }
          "gt" {
-             return [::tcl::mathfunc::legacy::_exec_op > $a {*}$args]
+            return [::tcl::mathfunc::legacy::_exec_op > $a {*}$args]
          }
          "ge" {
-             return [::tcl::mathfunc::legacy::_exec_op >= $a {*}$args]
+            return [::tcl::mathfunc::legacy::_exec_op >= $a {*}$args]
          }
          "lt" {
-             return [::tcl::mathfunc::legacy::_exec_op < $a {*}$args]
+            return [::tcl::mathfunc::legacy::_exec_op < $a {*}$args]
          }
          "le" {
-             return [::tcl::mathfunc::legacy::_exec_op <= $a {*}$args]
+            return [::tcl::mathfunc::legacy::_exec_op <= $a {*}$args]
          }
          default {
             error "bad compare operator - $op"
          }
       }
+   }
+   
+   # Bit manipulation on lists/vectors
+   
+   proc ::tcl::mathfunc::bitand {a args} {
+      return [::tcl::mathfunc::legacy::_exec_op & $a {*}$args]
+   }
+   
+   proc ::tcl::mathfunc::bitor {a args} {
+      return [::tcl::mathfunc::legacy::_exec_op | $a {*}$args]
+   }
+   
+   proc ::tcl::mathfunc::bitxor {a args} {
+      return [::tcl::mathfunc::legacy::_exec_op ^ $a {*}$args]
+   }
+   
+   # Bit shifting
+   #
+   # A positive shift count performs a shift-left.
+   # A negative shift count performs a shift-right.
+   #
+   #    BITSHIFT(scalar, scalar)
+   #       y = a shift b
+   #    BITSHIFT(scalar, vector)
+   #       y = [a shift b_0, a shift b_1, ...]
+   #    BITSHIFT(vector, scalar)
+   #       y = [a_0 shift b, a_1 shift b, a_2 shift b, ...]
+   #    BITSHIFT(vector, vector)
+   #       y = [a_0 shift b_0, a_1 shift b_1, ...]
+   #
+   
+   proc ::tcl::mathfunc::bitshift {a b} {
+      set a_len [llength $a]
+      set b_len [llength $b]
+      if {$a_len != $b_len} {
+         if {$a_len == 1} {
+            set a [lrepeat $b_len $a]
+         } else {
+            if {$b_len == 1} {
+               set b [lrepeat $a_len $b]
+            } else {
+               error "dimension mismatch"
+            }
+         }
+      }
+      set y {}
+      foreach pa $a pb $b {
+         # Positive b is shift-left, negative b is shift-right
+         if {$pb >= 0} {
+            lappend y [expr {$pa << $pb}]
+         } else {
+            lappend y [expr {$pa >> -$pb}]
+         }
+      }
+      return $y
    }
    
    # Additional math functions

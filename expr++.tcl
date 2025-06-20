@@ -630,6 +630,27 @@ namespace eval ::tcl::mathfunc::legacy {
       return [::tcl::mathfunc::legacy::_exec_op ^ $a {*}$args]
    }
    
+   proc ::tcl::mathfunc::bitnot {x args} {
+      set n [llength $args]
+      if {$n == 0} {
+         # Single scalar or list
+         set y {}
+         foreach p $x {
+            lappend y [expr {~$p}]
+         }
+      } else {
+         # List of scalars
+         if {[llength $x] > 1} {
+            error "bad argument dimension"
+         }
+         set y [expr {~$x}]
+         foreach p $args {
+            lappend y [expr {~$p}]
+         }
+      }
+      return $y
+   }
+   
    # Bit shifting
    #
    # A positive shift count performs a shift-left.

@@ -94,6 +94,7 @@ Bit manipulation of lists/vectors is supported by the following math functions:
     bitand(a, b) - Bitwise AND of scalars or elements in lists/vectors A and B
     bitor(a, b) - Bitwise OR of scalars or elements in lists/vectors A and B
     bitxor(a, b) - Bitwise XOR of scalars or elements in lists/vectors A and B
+    bitnot(x) - Bitwise NOT of scalars or elements in list/vector X
     bitget(x, k, [n]) - Get N bits (default: 1) from X starting at zero-based index K
     bitshift(x, k) - Bit shifting of elements in X by K positions
 

@@ -34,7 +34,7 @@ namespace eval ::tcl::mathfunc::legacy {
          }
          set y true
       }
-      return y
+      return $y
    }
    
    # Add new functions

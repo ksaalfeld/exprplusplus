@@ -636,37 +636,69 @@ namespace eval ::tcl::mathfunc::legacy {
    # A negative shift count performs a shift-right.
    #
    #    BITSHIFT(scalar, scalar)
-   #       y = a shift b
+   #       y = x shift b
    #    BITSHIFT(scalar, vector)
-   #       y = [a shift b_0, a shift b_1, ...]
+   #       y = [x shift b_0, x shift b_1, ...]
    #    BITSHIFT(vector, scalar)
-   #       y = [a_0 shift b, a_1 shift b, a_2 shift b, ...]
+   #       y = [x_0 shift b, x_1 shift b, x_2 shift b, ...]
    #    BITSHIFT(vector, vector)
-   #       y = [a_0 shift b_0, a_1 shift b_1, ...]
+   #       y = [x_0 shift b_0, x_1 shift b_1, ...]
    #
    
-   proc ::tcl::mathfunc::bitshift {a b} {
-      set a_len [llength $a]
+   proc ::tcl::mathfunc::bitshift {x b} {
+      set x_len [llength $x]
       set b_len [llength $b]
-      if {$a_len != $b_len} {
-         if {$a_len == 1} {
-            set a [lrepeat $b_len $a]
+      if {$x_len != $b_len} {
+         if {$x_len == 1} {
+            set x [lrepeat $b_len $x]
          } else {
             if {$b_len == 1} {
-               set b [lrepeat $a_len $b]
+               set b [lrepeat $x_len $b]
             } else {
                error "dimension mismatch"
             }
          }
       }
       set y {}
-      foreach pa $a pb $b {
+      foreach px $x pb $b {
          # Positive b is shift-left, negative b is shift-right
          if {$pb >= 0} {
-            lappend y [expr {$pa << $pb}]
+            lappend y [expr {$px << $pb}]
          } else {
-            lappend y [expr {$pa >> -$pb}]
+            lappend y [expr {$px >> -$pb}]
          }
+      }
+      return $y
+   }
+   
+   # Get N bits in X starting at position I
+   #
+   # Note that I is a zero-based index while GNU Octave uses one-based indices.
+   
+   proc ::tcl::mathfunc::bitget {x i {n 1}} {
+      set x_len [llength $x]
+      set i_len [llength $i]
+      if {![string is entier -strict $n] || ($n < 0)} {
+         error "argument must be numeric - $n"
+      }
+      if {$x_len != $i_len} {
+         if {$x_len == 1} {
+            set x [lrepeat $i_len $x]
+         } else {
+            if {$i_len == 1} {
+               set i [lrepeat $x_len $i]
+            } else {
+               error "dimension mismatch"
+            }
+         }
+      }
+      set m [expr {(1 << $n) - 1}]
+      set y {}
+      foreach px $x pi $i {
+         if {$pi < 0} {
+            error "negative bit index - $pi"
+         }
+         lappend y [expr {($px >> $pi) & $m}]
       }
       return $y
    }

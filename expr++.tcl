@@ -39,6 +39,14 @@ namespace eval ::tcl::mathfunc::legacy {
    
    # Add new functions
    
+   # Basic math function to create a vector that accepts expr notation
+   # 
+   # set myvec [expr {vec(1,2,3+1)}]; # 1 2 4
+   
+   proc ::tcl::mathfunc::vec {args} {
+      return $args
+   }
+   
    # Nth root of X
    #
    # This is computed via

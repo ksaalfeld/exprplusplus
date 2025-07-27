@@ -4,9 +4,19 @@ This package adds vector/list support to the Tcl expr command.
 
 It's a proof-of-concept implementation: Use it at your own risk.
 
-# Example
+# Usage
 
-This example computes the median absolute deviation of a vector/list:
+Put the package into `auto_path` and load it:
+
+    package require expr++
+
+Changes get into effect after loading the package.
+
+Note that the `expr` command is implicitely used within the conditionals of control structures (if, while, for, ...). Features added by this package are therefore available in their conditionals as well.
+
+# Examples
+
+The following example computes the median absolute deviation of a vector/list:
 
     set x {2.3 3.1 2.8 2.5 3.2}
     set mad [expr {median(abs(sub($x, median($x))))}]
@@ -22,15 +32,9 @@ It's possible to intermix scalar values and vectors:
     set y [expr {sub(mul($x,2),1)}]
     # y: 1.0 3.0 5.0 7.0 9.0
 
-# Usage
+# New functions
 
-Put package into auto_path and load it:
-
-    package require expr++
-
-Changes get into effect after loading the package.
-
-Beside replacing existing functions the package adds some new expr functions:
+Beside replacing existing functions the package adds some new math functions:
 
     nroot(x, n) - Compute the Nth root of X
     sgn(x) - Signum function
@@ -44,8 +48,8 @@ Beside replacing existing functions the package adds some new expr functions:
     mean(x) - Compute the mean value (average) of X
     median(x) - Compute the median value of X
 
-Tcl does not allow to replace expr operators. Therefore new expr functions
-are added that can handle vectors/lists:
+Tcl does not allow to replace math operators. Therefore new math functions
+were added that can handle vectors/lists:
 
     add(a, [b]) - Add scalars or lists/vectors A and B
     sub(a, [b]) - Subtract scalars or lists/vectors A and B
@@ -61,20 +65,20 @@ For example the following adds all elements of X returning their sum:
     set y [expr {add($x)}]
     # y: 28
 
-The capability of round() function is extended by optional new arguments
+The capability of `round()` function is extended by optional new arguments
 to specify the rounding mode and integral saturation:
 
     round(x, [mode, [type]])
 
-By default the behavior of round() when called with a single argument is unchanged.
-The mode argument can be one of the following values:
+By default the behavior of `round()` when called with a single argument is unchanged.
+The `mode` argument can be one of the following values:
 
     "infinity" (round ties away from zero)
     "zero" (round ties towards zero)
     "ceil" (round ties towards +inf)
     "floor" (round ties towards -inf)
 
-The type argument corresponds to the type argument of the fit() function
+The `type` argument corresponds to the type argument of the `fit()` function
 and can be set to one of the following values:
 
     "int" (integer of arbitrary size)
@@ -91,11 +95,11 @@ and can be set to one of the following values:
     "uint32" (32 bit unsigned integer)
     "uint64" (64 bit unsigned integer)
 
-To compare elements of lists/vectors a cmp() math function has been added:
+To compare elements of lists/vectors a `cmp()` math function has been added:
 
     cmp(a, b) - Compare scalar or list/vector A and B
 
-The function returns -1, 0 or 1 for each element in list A and B
+The function returns -1, 0 or 1 for each element in list `A` and `B`
 depending on their relation:
 
     -1 - Element A is smaller than B element
@@ -120,13 +124,10 @@ Bit manipulation of lists/vectors is supported by the following math functions:
     bitget(x, k, [n]) - Get N bits (default: 1) from X starting at zero-based index K
     bitshift(x, k) - Bit shifting of elements in X by K positions
 
-The functions bitshift() and bitget() support K being a list/vector.
+The math functions `bitshift()` and `bitget()` support `K` being a list/vector.
 
     range(N) - Create a list of values containing 0,1,2, ... N-1
     range(A, Z) - Create a list of values A <= A+i*STEP < Z with step size 1
     range(A, Z, STEP) - Create a list of values A <= A+i*STEP < Z with given step size
     pair(A, B) - Combine elements in A and B as key/value pairs returning the result as a single list
     dup(N, X) - Duplicate elements combining the result to a single list
-
-Note that expr is implicitely used within the conditionals of control structures (if, while, for, ...).
-The features added by this package are therefore available in their conditionals as well.

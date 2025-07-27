@@ -280,6 +280,10 @@ namespace eval ::tcl::mathfunc::legacy {
             set a [expr {-(2**63)}]
             set z [expr {2**63 - 1}]
          }
+         "uint" {
+            set a 0
+            set b +inf
+         }
          "byte" -
          "uint8" {
             set a 0
@@ -439,7 +443,7 @@ namespace eval ::tcl::mathfunc::legacy {
       # - "floor":    Round ties towards negative infinity (-inf).
       #
       
-      proc ::tcl::mathfunc::round {x {mode "infinity"} {sat "int"}} {
+      proc ::tcl::mathfunc::round {x {mode "infinity"} {type "int"}} {
          set y {}
          foreach p $x {
             switch -nocase -- $mode {
@@ -473,7 +477,7 @@ namespace eval ::tcl::mathfunc::legacy {
             }
             lappend y $q
          }
-         return [::tcl::mathfunc::fit $y $sat]
+         return [::tcl::mathfunc::fit $y $type]
       }
       # Trace command renaming
       trace add command ::tcl::mathfunc::round rename ::tcl::mathfunc::legacy::_sync
@@ -553,6 +557,7 @@ namespace eval ::tcl::mathfunc::legacy {
    }
    
    # New math functions being added: no need to move any original implementation
+   #
    
    proc ::tcl::mathfunc::add {a args} {
       return [::tcl::mathfunc::legacy::_exec_op + $a {*}$args]
@@ -574,46 +579,172 @@ namespace eval ::tcl::mathfunc::legacy {
       return [::tcl::mathfunc::legacy::_exec_op % $a {*}$args]
    }
    
-   # We can't override compare operators so we add a cmp() function
-   #
-   # The OP argument can be one of the following values:
-   #    "eq"   A == B
-   #    "ne"   A != B
-   #    "gt"   A > B
-   #    "ge"   A >= B
-   #    "lt"   A < B
-   #    "le"   A <= B
-   #
-   # Example:
-   #
-   #    set a {-3 2 -1 5 -6}
-   #    expr {cmp("gt", $a, 0)}
+   # We can't override compare operators so we add cmp() functions
    #
    
-   proc ::tcl::mathfunc::cmp {op a args} {
-      switch -nocase -- $op {
-         "eq" {
-            return [::tcl::mathfunc::legacy::_exec_op == $a {*}$args]
+   proc ::tcl::mathfunc::cmpeq {a args} {
+      if {[llength $args] <= 0} {
+         set n [llength $a]
+         if {$n <= 1} {
+            error "need two arguments or list"
          }
-         "ne" {
-            return [::tcl::mathfunc::legacy::_exec_op != $a {*}$args]
+         set y 1
+         set k [lindex $a 0]
+         for {set i 1} {$i < $n} {incr i} {
+            set p [lindex $a $i]
+            if {!($k == $p)} {
+               set y 0
+               break
+            }
+            set k $p
          }
-         "gt" {
-            return [::tcl::mathfunc::legacy::_exec_op > $a {*}$args]
+      } else {
+         set y [::tcl::mathfunc::legacy::_exec_op == $a {*}$args]
+      }
+      return $y
+   }
+   
+   proc ::tcl::mathfunc::cmpne {a args} {
+      if {[llength $args] <= 0} {
+         set n [llength $a]
+         if {$n <= 1} {
+            error "need two arguments or list"
          }
-         "ge" {
-            return [::tcl::mathfunc::legacy::_exec_op >= $a {*}$args]
+         set y 1
+         set k [lindex $a 0]
+         for {set i 1} {$i < $n} {incr i} {
+            set p [lindex $a $i]
+            if {!($k != $p)} {
+               set y 0
+               break
+            }
+            set k $p
          }
-         "lt" {
-            return [::tcl::mathfunc::legacy::_exec_op < $a {*}$args]
+      } else {
+         set y [::tcl::mathfunc::legacy::_exec_op != $a {*}$args]
+      }
+      return $y
+   }
+   
+   proc ::tcl::mathfunc::cmpgt {a args} {
+      if {[llength $args] <= 0} {
+         set n [llength $a]
+         if {$n <= 1} {
+            error "need two arguments or list"
          }
-         "le" {
-            return [::tcl::mathfunc::legacy::_exec_op <= $a {*}$args]
+         set y 1
+         set k [lindex $a 0]
+         for {set i 1} {$i < $n} {incr i} {
+            set p [lindex $a $i]
+            if {!($k > $p)} {
+               set y 0
+               break
+            }
+            set k $p
          }
-         default {
-            error "bad compare operator - $op"
+      } else {
+         set y [::tcl::mathfunc::legacy::_exec_op > $a {*}$args]
+      }
+      return $y
+   }
+   
+   proc ::tcl::mathfunc::cmpge {a args} {
+      if {[llength $args] <= 0} {
+         set n [llength $a]
+         if {$n <= 1} {
+            error "need two arguments or list"
+         }
+         set y 1
+         set k [lindex $a 0]
+         for {set i 1} {$i < $n} {incr i} {
+            set p [lindex $a $i]
+            if {!($k >= $p)} {
+               set y 0
+               break
+            }
+            set k $p
+         }
+      } else {
+         set y [::tcl::mathfunc::legacy::_exec_op >= $a {*}$args]
+      }
+      return $y
+   }
+   
+   proc ::tcl::mathfunc::cmplt {a args} {
+      if {[llength $args] <= 0} {
+         set n [llength $a]
+         if {$n <= 1} {
+            error "need two arguments or list"
+         }
+         set y 1
+         set k [lindex $a 0]
+         for {set i 1} {$i < $n} {incr i} {
+            set p [lindex $a $i]
+            if {!($k < $p)} {
+               set y 0
+               break
+            }
+            set k $p
+         }
+      } else {
+         set y [::tcl::mathfunc::legacy::_exec_op < $a {*}$args]
+      }
+      return $y
+   }
+   
+   proc ::tcl::mathfunc::cmple {a args} {
+      if {[llength $args] <= 0} {
+         set n [llength $a]
+         if {$n <= 1} {
+            error "need two arguments or list"
+         }
+         set y 1
+         set k [lindex $a 0]
+         for {set i 1} {$i < $n} {incr i} {
+            set p [lindex $a $i]
+            if {!($k <= $p)} {
+               set y 0
+               break
+            }
+            set k $p
+         }
+      } else {
+         set y [::tcl::mathfunc::legacy::_exec_op <= $a {*}$args]
+      }
+      return $y
+   }
+   
+   proc ::tcl::mathfunc::cmp {a b} {
+      set na [llength $a]
+      set nb [llength $b]
+      if {$na == 1} {
+         # A is a scalar
+         if {$nb != 1} {
+            set a [lrepeat $nb $a]
+         }
+      } else {
+         # A is a list and B can be scalar or list
+         if {$nb != 1} {
+            if {$nb != $na} {
+               error "dimension mismatch"
+            }
+         } else {
+            set b [lrepeat $na $b]
          }
       }
+      set y {}
+      foreach p $a q $b {
+         if {$p < $q} {
+            lappend y -1
+         } else {
+            if {$p > $q} {
+               lappend y 1
+            } else {
+               lappend y 0
+            }
+         }
+      }
+      return $y
    }
    
    # Bit manipulation on lists/vectors
@@ -694,14 +825,12 @@ namespace eval ::tcl::mathfunc::legacy {
    
    # Get N bits in X starting at position I
    #
+   # Both arguments I and N can be either a scalar value or a list/vector of same length as X.
    # Note that I is a zero-based index while GNU Octave uses one-based indices.
    
    proc ::tcl::mathfunc::bitget {x i {n 1}} {
       set x_len [llength $x]
       set i_len [llength $i]
-      if {![string is entier -strict $n] || ($n < 0)} {
-         error "argument must be numeric - $n"
-      }
       if {$x_len != $i_len} {
          if {$x_len == 1} {
             set x [lrepeat $i_len $x]
@@ -713,13 +842,35 @@ namespace eval ::tcl::mathfunc::legacy {
             }
          }
       }
-      set m [expr {(1 << $n) - 1}]
+      # At this point X and I have equal dimension
       set y {}
-      foreach px $x pi $i {
-         if {$pi < 0} {
-            error "negative bit index - $pi"
+      set n_len [llength $n]
+      if {$n_len == 1} {
+         # N is scalar value
+         if {![string is entier -strict $n] || ($n < 0)} {
+            error "argument must be numeric bit length - $n"
          }
-         lappend y [expr {($px >> $pi) & $m}]
+         set m [expr {(1 << $n) - 1}]
+         foreach px $x pi $i {
+            if {![string is entier -strict $pi] || ($pi < 0)} {
+               error "negative bit index - $pi"
+            }
+            lappend y [expr {($px >> $pi) & $m}]
+         }
+      } else {
+         # N is a list/vector
+         if {$n_len != $x_len} {
+            error "dimension mismatch"
+         }
+         foreach px $x pi $i pn $n {
+            if {![string is entier -strict $pi] || ($pi < 0)} {
+               error "negative bit index - $pi"
+            }
+            if {![string is entier -strict $pn] || ($pn < 0)} {
+               error "argument must be numeric bit length - $pn"
+            }
+            lappend y [expr {($px >> $pi) & ((1 << $pn) - 1)}]
+         }
       }
       return $y
    }
@@ -844,6 +995,147 @@ namespace eval ::tcl::mathfunc::legacy {
       }
       return $y
    }
+
+   # Return a list from expr command
+   #
+   # Note this requires to fully qualify ::list in all commands in ::tcl::mathfunc namespace
+   #
+   
+   proc ::tcl::mathfunc::list {args} {
+      return $args
+   }
+   
+   # A mix between Python range() and MATLAB/GNU Octave range supporting the syntax
+   #
+   #    range(N)            - 0, 1, 2, ... N-1
+   #    range(A, Z)         - A, A+1, ... Z-1
+   #    range(A, Z, STEP)   - A+i*STEP < Z
+   #
+   
+   proc ::tcl::mathfunc::range {x args} {
+      set y {}
+      switch -- [llength $args] {
+         0 {
+            # range(N): 0 ... N-1
+            if {![string is entier -strict $x]} {
+               error "range boundary must be integer"
+            }
+            for {set i 0} {$i < $x} {incr i} {
+               lappend y $i
+            }
+         }
+         1 {
+            # range(a, z)
+            set z [lindex $args 0]
+            if {![string is entier -strict $x] || ![string is entier -strict $z]} {
+               error "range boundary must be integer"
+            }
+            if {$z > $x} {
+               # positive direction
+               for {set i $x} {$i < $z} {incr i} {
+                  lappend y $i
+               }
+            } else {
+               # negative direction
+               for {set i $x} {$i > $z} {incr i -1} {
+                  lappend y $i
+               }
+            }
+         }
+         2 {
+            # range(a, z, inc)
+            set z [lindex $args 0]
+            if {![string is double -strict $z] || ![string is double -strict $z]} {
+               error "range boundary must be numeric"
+            }
+            if {($z != $z) || (abs($z) == Inf) || ($x != $x) || (abs($x) == Inf)} {
+               error "range boundary is not finite"
+            }
+            set inc [lindex $args 1]
+            if {$inc == 0} {
+               error "increment value must be non-zero"
+            }
+            if {$inc > 0} {
+               # positive direction
+               if {$z < $x} {
+                  error "bad range: stop value must be greater than start value"
+               }
+               set p $x
+               for {set i 0} {$p < $z} {incr i} {
+                  lappend y $p
+                  set p [expr {$x + ($i * $inc)}]
+               }
+            } else {
+               # negative direction
+               if {$z > $x} {
+                  error "bad range: stop value must be lower than start value"
+               }
+               set p $x
+               for {set i 0} {$p > $z} {incr i} {
+                  lappend y $p
+                  set p [expr {$x + ($i * $inc)}]
+               }
+            }
+         }
+         default {
+            error "bad argument count"
+         }
+      }
+      return $y
+   }
+   
+   # Combine elements of lists A (keys) and B (values) returning a single list containing key/value pairs.
+   # The result can be used as input to "array set" command.
+   #
+   
+   proc ::tcl::mathfunc::pair {a b} {
+      set na [llength $a]
+      set nb [llength $b]
+      if {($na <= 0) || ($nb <= 0)} {
+         error "dimension mismatch"
+      }
+      set y {}
+      for {set i 0} {$i < max($na,$nb)} {incr i} {
+         lappend y [lindex $a [expr {$i % $na}]] [lindex $b [expr {$i % $nb}]]
+      }
+      return $y
+   }
+   
+   # Create a list by duplicating n-times the value X.
+   # This is a substitute for GNU Octave ones() and zeros() functions.
+   #
+   #    dup(N, 0) - zeros(1, N) [see GNU Octave]
+   #    dup(N, 1) - ones(1, N) [see GNU Octave]
+   #    dup(1, x1, x2, ...) - return arguments as a list (x1, x2 ... ) [alternative list() function]
+   #    dup({n1 n2 ...}, x1, x2, ...) - return list (n1 x x1, n2 x x2, ... )
+   #
+   
+   proc ::tcl::mathfunc::dup {n x args} {
+      set nn [llength $n]
+      if {$nn == 0} {
+         error "bad size: must be an integer greater or equal zero"
+      }
+      foreach c $n {
+         if {![string is integer -strict $c] || ($c < 0)} {
+            error "bad size: must be an integer greater or equal zero"
+         }
+      }
+      # if X is a list no additional arguments are allowed
+      if {[llength $args] > 0} {
+         if {[llength $x] > 1} {
+            error "dimension mismatch"
+         }
+      }
+      lappend p {*}$x {*}$args
+      set pn [llength $p]
+      set y {}
+      if {$pn > 0} {
+         for {set i 0} {$i < max($nn, $pn)} {incr i} {
+            lappend y {*}[lrepeat [lindex $n [expr {$i % $nn}]] [lindex $p [expr {$i % $pn}]]]
+         }
+      }
+      return $y
+   }
    
    # Cleanup
    rename _move {}
@@ -851,4 +1143,4 @@ namespace eval ::tcl::mathfunc::legacy {
 }
 
 
-package provide expr++ 1.0.0
+package provide expr++ 1.0.1

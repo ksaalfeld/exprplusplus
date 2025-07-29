@@ -31,6 +31,12 @@ It's possible to intermix scalar values and vectors:
     set x {1.0 2.0 3.0 4.0 5.0}
     set y [expr {sub(mul($x,2),1)}]
     # y: 1.0 3.0 5.0 7.0 9.0
+    
+Using the "vec" function, you can create a list with expressions.
+
+    set x 5.0
+    set y [expr {vec($x+1,$x*2,$x/4)}]
+    # y: 6.0 10.0 1.25
 
 # New functions
 

@@ -334,6 +334,66 @@ namespace eval ::tcl::mathfunc::legacy {
    }
    
    
+   # n choose k function
+   #
+   
+   proc ::tcl::mathfunc::nchoosek {n k} {
+      if {![string is entier -strict $n] || ![string is entier -strict $k]} {
+         error "N and K must be integer"
+      }
+      if {($n < 0) || ($k < 0) || ($k > $n)} {
+         error "N must be non-negative integer >= K"
+      }
+      # Each row in Pascals triangle is symmetrical around the center.
+      # We need half the cache size when using this property.
+      if {$k > ($n >> 1)} {
+         set k [expr {$n - $k}]
+      }
+      # First LHS diagonal contains always 1.
+      # Same is true for entire rows 0 and 1.
+      if {($k == 0) || ($n < 2)} {
+         return 1
+      }
+      if {$k == 1} {
+         return $n
+      }
+      # Lookup table starting at C(4,*) without first two LHS diagonals and half the row length.
+      set table {
+         {6}
+         {10}
+         {15 20}
+         {21 35}
+         {28 56 70}
+         {36 84 126}
+         {45 120 210 252}
+         {55 165 330 462}
+         {66 220 495 792 924}
+         {78 286 715 1287 1716}
+         {91 364 1001 2002 3003 3432}
+         {105 455 1365 3003 5005 6435}
+         {120 560 1820 4368 8008 11440 12870}
+         {136 680 2380 6188 12376 19448 24310}
+         {153 816 3060 8568 18564 31824 43758 48620}
+         {171 969 3876 11628 27132 50388 75582 92378}
+         {190 1140 4845 15504 38760 77520 125970 167960 184756}
+      }
+      if {$n < [llength $table]} {
+         # At this point we have C(N,K) in lookup table
+         set y [lindex [lindex $table [expr {$n - 4}]] [expr {$k - 2}]]
+      } else {
+         # If N exceeds lookup table we compute entire row until getting to the K-th element
+         # Iterative formula:
+         #    C(n,0) = 1 for i=0
+         #    C(n,i+1) = C(n,i) * (n - i) / (i + 1)
+         set y 1
+         for {set i 0} {$i < $k} {incr i} {
+            set y [expr {($y * ($n - $i)) / ($i + 1)}]
+         }
+      }
+      return $y
+   }
+   
+   
    # Replace (single argument) math functions
    
    foreach n {sin asin sinh cos acos cosh tan atan tanh asinh acosh atanh exp sqrt isqrt log log10 ceil floor round abs int double bool entier wide sgn fix} {
@@ -393,7 +453,7 @@ namespace eval ::tcl::mathfunc::legacy {
    #    y = [a_1 a_2 ... a_N] ** [b_1 b_2 ... b_N]
    #      = [a_1**b_1 a_2**b_2 ... a_N**b_N]
 
-   foreach n {pow atan2 fmod hypot nroot fit} {
+   foreach n {pow atan2 fmod hypot nroot fit nchoosek} {
       # Ignore non-existing math functions
       if {[_move $n]} {
          proc ::tcl::mathfunc::$n {a b} {

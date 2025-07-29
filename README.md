@@ -47,6 +47,7 @@ Beside replacing existing functions the package adds some new math functions:
     fit(x, type) - Fit (saturate) value X to range of given type
     mean(x) - Compute the mean value (average) of X
     median(x) - Compute the median value of X
+    nchoosek(n, k) - n choose k function
 
 Tcl does not allow to replace math operators. Therefore new math functions
 were added that can handle vectors/lists:
@@ -65,7 +66,7 @@ For example the following adds all elements of X returning their sum:
     set y [expr {add($x)}]
     # y: 28
 
-The capability of `round()` function is extended by optional new arguments
+The capability of the `round()` function is extended by optional new arguments
 to specify the rounding mode and integral saturation:
 
     round(x, [mode, [type]])

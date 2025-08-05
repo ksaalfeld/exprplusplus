@@ -48,6 +48,7 @@ Beside replacing existing functions the package adds some common math functions:
     mean(x) - Compute the mean value (average) of X
     median(x) - Compute the median value of X
     nchoosek(n, k) - n choose k function
+    factorial(n) - Compute n!
 
 Tcl does not allow to replace math operators. Therefore new math functions
 were added that can handle vectors/lists:
@@ -60,7 +61,7 @@ were added that can handle vectors/lists:
 
 When called with a single list/vector argument the functions successively
 apply the operation to the elements of that list and return a scalar value.
-For example the following adds all elements and returns their sum:
+This is an example:
 
     set x {1.0 2.0 3.0 4.0 5.0 6.0 7.0}
     set y [expr {add($x)}]

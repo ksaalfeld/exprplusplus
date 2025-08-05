@@ -1,6 +1,6 @@
 # About
 
-This package adds vector/list support to the Tcl expr command.
+This package adds vector/list support to the Tcl `expr` command.
 
 It's a proof-of-concept implementation: Use it at your own risk.
 
@@ -34,7 +34,7 @@ It's possible to intermix scalar values and vectors:
 
 # New functions
 
-Beside replacing existing functions the package adds some new math functions:
+Beside replacing existing functions the package adds some common math functions:
 
     nroot(x, n) - Compute the Nth root of X
     sgn(x) - Signum function
@@ -60,11 +60,13 @@ were added that can handle vectors/lists:
 
 When called with a single list/vector argument the functions successively
 apply the operation to the elements of that list and return a scalar value.
-For example the following adds all elements of X returning their sum:
+For example the following adds all elements and returns their sum:
 
-    set x {1 2 3 4 5 6 7}
+    set x {1.0 2.0 3.0 4.0 5.0 6.0 7.0}
     set y [expr {add($x)}]
-    # y: 28
+    # y: 28.0
+    set avg [expr {add($x)/length($x)}]
+    # avg: 4.0
 
 The capability of the `round()` function is extended by optional new arguments
 to specify the rounding mode and integral saturation:
@@ -107,7 +109,13 @@ depending on their relation:
      0 - Element A is equal to B element
      1 - Element A is bigger than B element
 
-There are specific version to test for particular relations:
+This is an example:
+
+    set x {1 2 3 4 5}
+    set y [expr {cmp(3,$x)}]
+    # y: 1 1 0 -1 -1
+
+There are specific versions to test for particular relations:
 
     cmpeq(a, [b]) - Test elements for equality (A == B)
     cmpne(a, [b]) - Test elements for inequality (A != B)
@@ -127,8 +135,22 @@ Bit manipulation of lists/vectors is supported by the following math functions:
 
 The math functions `bitshift()` and `bitget()` support `K` being a list/vector.
 
+    list(A, [B], ...) - Return arguments as a list
+    length(A, [B], ...) - Returns the number of elements in A or the number of arguments if B is given
     range(N) - Create a list of values containing 0,1,2, ... N-1
     range(A, Z) - Create a list of values A <= A+i*STEP < Z with step size 1
     range(A, Z, STEP) - Create a list of values A <= A+i*STEP < Z with given step size
     pair(A, B) - Combine elements in A and B as key/value pairs returning the result as a single list
     dup(N, X) - Duplicate elements combining the result to a single list
+
+Example:
+
+    # create an array y mapping indices i to 2**i
+    set x [expr {range(0, 9)}]
+    array set y [expr {pair($x, pow(2, $x))}]
+    # y(0) = 1.0
+    # y(1) = 2.0
+    # y(2) = 4.0
+    # y(3) = 8.0
+    # ...
+    # y(8) = 256.0

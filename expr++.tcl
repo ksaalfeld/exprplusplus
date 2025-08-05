@@ -394,9 +394,27 @@ namespace eval ::tcl::mathfunc::legacy {
    }
    
    
+   # Factorial function
+   #
+   #    factorial(N) = mul(1,2,3,...,N)
+   #                 = range(1,N+1)
+   #
+   
+   proc ::tcl::mathfunc::factorial {n} {
+      if {![string is entier -strict $n] || ($n < 0)} {
+         error "N must be integer >= 0"
+      }
+      set y 1
+      for {set i 2} {$i <= $n} {incr i} {
+         set y [expr {$y * $i}]
+      }
+      return $y
+   }
+   
+   
    # Replace (single argument) math functions
    
-   foreach n {sin asin sinh cos acos cosh tan atan tanh asinh acosh atanh exp sqrt isqrt log log10 ceil floor round abs int double bool entier wide sgn fix} {
+   foreach n {sin asin sinh cos acos cosh tan atan tanh asinh acosh atanh exp sqrt isqrt log log10 ceil floor round abs int double bool entier wide sgn fix factorial} {
       # Ignore non-existing math functions
       if {[_move $n]} {
          proc ::tcl::mathfunc::$n {x args} {
@@ -1048,7 +1066,7 @@ namespace eval ::tcl::mathfunc::legacy {
          set p [list $x {*}$args]
       }
       # Let NaN propagate into expr:
-      # Math functions will throw errors...
+      # Math functions floor() and ceil() throw errors...
       set y {}
       foreach a $p {
          lappend y [expr {($a > 0.0) ? floor($a) : ceil($a)}]
@@ -1056,13 +1074,28 @@ namespace eval ::tcl::mathfunc::legacy {
       return $y
    }
 
-   # Return a list from expr command
+   # Return arguments as a list
+   # Typically used to return a list from the expr command
    #
    # Note this requires to fully qualify ::list in all commands in ::tcl::mathfunc namespace
    #
    
    proc ::tcl::mathfunc::list {args} {
       return $args
+   }
+   
+   # Returns the number of elements in list.
+   #
+   
+   proc ::tcl::mathfunc::length {args} {
+      set N [llength $args]
+      if {$N == 1} {
+         set y [llength [lindex $args 0]]
+      } else {
+         # This case also catches zero arguments
+         set y $N
+      }
+      return $y
    }
    
    # A mix between Python range() and MATLAB/GNU Octave range supporting the syntax
@@ -1144,19 +1177,35 @@ namespace eval ::tcl::mathfunc::legacy {
       return $y
    }
    
-   # Combine elements of lists A (keys) and B (values) returning a single list containing key/value pairs.
-   # The result can be used as input to "array set" command.
+   # Combine elements of specified lists returning a single list containing key/value pairs.
+   # The result may be used as input to "array set" command.
    #
    
-   proc ::tcl::mathfunc::pair {a b} {
-      set na [llength $a]
-      set nb [llength $b]
-      if {($na <= 0) || ($nb <= 0)} {
+   proc ::tcl::mathfunc::pair {args} {
+      set N [llength $args]
+      if {$N <= 0} {
          error "dimension mismatch"
       }
       set y {}
-      for {set i 0} {$i < max($na,$nb)} {incr i} {
-         lappend y [lindex $a [expr {$i % $na}]] [lindex $b [expr {$i % $nb}]]
+      set d 1
+      foreach x $args {
+         set c [llength $x]
+         if {$c <= 0} {
+            error "dimension mismatch"
+         }
+         if {$c != 1} {
+            if {($c != $d) && ($d > 1)} {
+               error "dimension mismatch"
+            }
+            set d $c
+         }
+      }
+      for {set i 0} {$i < $d} {incr i} {
+         for {set k 0} {$k < [llength $args]} {incr k} {
+            set p [lindex $args $k]
+            set len [llength $p]
+            lappend y [lindex $p [expr {$i % $len}]]
+         }
       }
       return $y
    }
